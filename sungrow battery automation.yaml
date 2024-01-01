@@ -1,0 +1,396 @@
+- id: '1704072130211'
+  alias: Battery slow + force
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: '1'
+  - platform: time_pattern
+    minutes: '16'
+  - platform: time_pattern
+    minutes: '31'
+  - platform: time_pattern
+    minutes: '46'
+  condition: []
+  action:
+  - if:
+    - condition: time
+      after: 06:00:00
+      before: 09:00:00
+    then:
+    - alias: Set to forced mode if not already
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Forced mode
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced mode
+        target:
+          entity_id: input_select.set_sg_ems_mode
+    - alias: Set to Forced Stop Mode if not already
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_battery_forced_charge_discharge_cmd
+          state: Stop (default)
+        alias: Check if stopped
+      then:
+      - alias: Set Forced Stop Mode
+        service: input_select.select_option
+        data:
+          option: Stop (default)
+        target:
+          entity_id:
+          - input_select.set_sg_battery_forced_charge_discharge_cmd
+    alias: Delay battery start time
+  - alias: 8 to 9am slow charge (stop if not sunny)
+    if:
+    - condition: time
+      after: 08:00:00
+      before: 09:00:00
+    then:
+    - alias: Set to forced mode if not already
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Forced mode
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced mode
+        target:
+          entity_id: input_select.set_sg_ems_mode
+    - alias: Weather dependent charge speed selection
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: weather.forecast_home
+          state: sunny
+        - condition: state
+          entity_id: weather.forecast_home
+          state: partlycloudy
+        alias: 'Weather is not sunny '
+      then:
+      - alias: Set to Forced Stop Mode if not already
+        if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: input_select.set_sg_battery_forced_charge_discharge_cmd
+            state: Stop (default)
+          alias: Check if stopped
+        then:
+        - alias: Set Forced Stop Mode
+          service: input_select.select_option
+          data:
+            option: Stop (default)
+          target:
+            entity_id:
+            - input_select.set_sg_battery_forced_charge_discharge_cmd
+      else:
+      - alias: Set normal charging speed
+        service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_forced_charge_discharge_power
+        data:
+          value: 2000
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: input_select.set_sg_battery_forced_charge_discharge_cmd
+            state: Forced charge
+        then:
+        - service: input_select.select_option
+          data:
+            option: Forced charge
+          target:
+            entity_id:
+            - input_select.set_sg_battery_forced_charge_discharge_cmd
+          alias: Set Forced Charge Mode
+        alias: Set to Forced Charging Mode if not already
+  - alias: 9 to 10am slow charge
+    if:
+    - condition: time
+      after: 09:00:00
+      before: '10:00:00'
+    then:
+    - alias: Set to forced mode if not already
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Forced mode
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced mode
+        target:
+          entity_id: input_select.set_sg_ems_mode
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_battery_forced_charge_discharge_cmd
+          state: Forced charge
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced charge
+        target:
+          entity_id:
+          - input_select.set_sg_battery_forced_charge_discharge_cmd
+        alias: Set Forced Charge Mode
+      alias: Set to Forced Charging Mode if not already
+    - alias: Weather dependent charge speed selection
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: weather.forecast_home
+          state: sunny
+        - condition: state
+          entity_id: weather.forecast_home
+          state: partlycloudy
+        alias: 'Weather is not sunny '
+      then:
+      - alias: Set reduced charging speed
+        service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_forced_charge_discharge_power
+        data:
+          value: 1000
+      else:
+      - alias: Set normal charging speed
+        service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_forced_charge_discharge_power
+        data:
+          value: 2000
+  - alias: 10 to 11am medium charge
+    if:
+    - condition: time
+      after: '10:00:00'
+      before: '11:00:00'
+    then:
+    - alias: Set to forced mode if not already
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Forced mode
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced mode
+        target:
+          entity_id: input_select.set_sg_ems_mode
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_battery_forced_charge_discharge_cmd
+          state: Forced charge
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced charge
+        target:
+          entity_id:
+          - input_select.set_sg_battery_forced_charge_discharge_cmd
+        alias: Set Forced Charge Mode
+      alias: Set to Forced Charging Mode if not already
+    - alias: Weather dependent charge speed selection
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: weather.forecast_home
+          state: sunny
+        - condition: state
+          entity_id: weather.forecast_home
+          state: partlycloudy
+        alias: 'Weather is not sunny '
+      then:
+      - alias: Set reduced charging speed
+        service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_forced_charge_discharge_power
+        data:
+          value: 2000
+      else:
+      - alias: Set normal charging speed
+        service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_forced_charge_discharge_power
+        data:
+          value: 4500
+  - alias: 11am to 2pm fast charge
+    if:
+    - condition: time
+      after: '11:00:00'
+      before: '14:00:00'
+    then:
+    - alias: Set to forced mode if not already
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Forced mode
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced mode
+        target:
+          entity_id: input_select.set_sg_ems_mode
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_battery_forced_charge_discharge_cmd
+          state: Forced charge
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced charge
+        target:
+          entity_id:
+          - input_select.set_sg_battery_forced_charge_discharge_cmd
+        alias: Set Forced Charge Mode
+      alias: Set to Forced Charging Mode if not already
+    - alias: Weather dependent charge speed selection
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: weather.forecast_home
+          state: sunny
+        - condition: state
+          entity_id: weather.forecast_home
+          state: partlycloudy
+        alias: 'Weather is not sunny '
+      then:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_forced_charge_discharge_power
+        data:
+          value: 3000
+        alias: Set reduced charging speed
+      else:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_forced_charge_discharge_power
+        data:
+          value: 6000
+        alias: Set normal charging speed
+  - alias: Force charge from grid if not full yet 2-4pm
+    if:
+    - condition: time
+      after: '14:00:00'
+      before: '16:00:00'
+    then:
+    - alias: Set to forced mode if not already
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Forced mode
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced mode
+        target:
+          entity_id: input_select.set_sg_ems_mode
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_battery_forced_charge_discharge_cmd
+          state: Forced charge
+      then:
+      - service: input_select.select_option
+        data:
+          option: Forced charge
+        target:
+          entity_id:
+          - input_select.set_sg_battery_forced_charge_discharge_cmd
+        alias: Set Forced Charge Mode
+      alias: Set to Forced Charging Mode if not already
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.set_sg_forced_charge_discharge_power
+      data:
+        value: 8700
+  - alias: Peak discharge and lower reserve
+    if:
+    - condition: time
+      after: '16:00:00'
+      before: 09:00:00
+    then:
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Self-consumption mode (default)
+      then:
+      - service: input_select.select_option
+        data:
+          option: Self-consumption mode (default)
+        target:
+          entity_id: input_select.set_sg_ems_mode
+      alias: Set to self consumption if not already
+    - if:
+      - condition: numeric_state
+        entity_id: sensor.reserved_soc_for_backup
+        above: 10
+      then:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_reserved_soc_for_backup
+        data:
+          value: 10
+      alias: Set reserve SOC to 10%
+  - alias: Shoulder discharge and higher reserve
+    if:
+    - condition: time
+      after: '21:00:00'
+      before: 06:00:00
+    then:
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.set_sg_ems_mode
+          state: Self-consumption mode (default)
+      then:
+      - service: input_select.select_option
+        data:
+          option: Self-consumption mode (default)
+        target:
+          entity_id: input_select.set_sg_ems_mode
+      alias: Set to self consumption if not already
+    - if:
+      - condition: numeric_state
+        entity_id: sensor.reserved_soc_for_backup
+        below: 35
+      then:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.set_sg_reserved_soc_for_backup
+        data:
+          value: 35
+        alias: Set reserve SOC 35%
+      alias: Set reserve SOC 35% if not already
+  mode: single
